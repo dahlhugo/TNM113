@@ -5,24 +5,29 @@ s.quit;
 // Start oscilloscope
 s.scope;
 
+
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\samplePlayer, { arg bufnum = 0;
+SynthDef(\samplePlayer, {
+	arg bufnum = 0, rateMod = 1, volumeMod = 1;
     var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
-		rate: BufRateScale.kr(bufnum),
+		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 0,
+		loop: 1,
 		doneAction: 0,
 	);
 
-	var output = sound;
+	var output = sound * volumeMod;
+	output = RLPF.ar(output, 440.0, 0.1);
+	//output = HPF.ar(output, 5440.0);
+	//output = BPF.ar(output, [1400, 3000]);
 
-	Out.ar(0, output);
+	Out.ar(0, [output, output]);
 }).add;
 
 )
@@ -34,8 +39,12 @@ SynthDef(\samplePlayer, { arg bufnum = 0;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sound.wav");
+var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/bosse.wav");
 
-Synth.new(\samplePlayer, [\bufnum, soundSample]);
+
+
+~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample]).register;
+
+~samplePlayer.set(\rateMod, 1);
 
 )
