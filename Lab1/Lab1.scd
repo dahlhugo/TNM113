@@ -22,10 +22,16 @@ SynthDef(\samplePlayer, {
 		doneAction: 0,
 	);
 
-	var output = sound * volumeMod;
-	output = RLPF.ar(output, 440.0, 0.1);
+	var envelope = EnvGen.kr(Env.perc(attackTime: 0.5, releaseTime: 2,
+		level: 1.0, curve: -4.0));
+
+	var envelope2 = EnvGen.kr(Env.perc(attackTime: 2, releaseTime: 2,
+level: 1.0, curve: -1.0).range(100,10000));
+
+	var output = sound * volumeMod * envelope2;
+	//output = RLPF.ar(output, 440.0, 0.1);
 	//output = HPF.ar(output, 5440.0);
-	//output = BPF.ar(output, [1400, 3000]);
+	//output = BPF.ar(output, 440.0, 0.1);
 
 	Out.ar(0, [output, output]);
 }).add;
@@ -41,10 +47,10 @@ SynthDef(\samplePlayer, {
 
 var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/bosse.wav");
 
+~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample]);
+
+~samplePlayer.set(\volumeMod, 0.06);
 
 
-~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample]).register;
-
-~samplePlayer.set(\rateMod, 1);
 
 )
