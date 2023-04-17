@@ -37,8 +37,6 @@ SynthDef(\samplePlayer, {
 }).add;
 
 
-
-// Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 SynthDef(\samplePlayer2, {
 	arg bufnum = 0, rateMod = 1, volumeMod = 1;
     var sound = PlayBuf.ar(
@@ -51,17 +49,8 @@ SynthDef(\samplePlayer2, {
 		doneAction: 0,
 	);
 
-	//var envelope = EnvGen.kr(Env.perc(attackTime: 0.5, releaseTime: 2,
-		//level: 1.0, curve: -4.0));
-
-	//var envelope2 = EnvGen.kr(Env.perc(attackTime: 2, releaseTime: 2,
-//level: 1.0, curve: -1.0).range(100,10000));
 
 	var output = sound * volumeMod;
-	//output = HPF.ar(output, 440.0);
-	//output = RLPF.ar(output, 440.0, 0.1);
-	//output = HPF.ar(output, 5440.0);
-	//output = BPF.ar(output, 440.0, 0.1);
 
 	Out.ar(0, [output, output]);
 }).add;
@@ -99,7 +88,6 @@ SynthDef(\samplePlayer4, {
 	);
 
 
-
 	var output = sound * volumeMod;
 	Out.ar(0, [output, output]);
 }).add;
@@ -108,12 +96,8 @@ SynthDef(\samplePlayer4, {
 
 
 
-
-
-
 // Klientside skript
 (
-// Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/bosse.wav");
 var soundSample2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/bosse2.wav");
@@ -126,7 +110,7 @@ fork({
 ~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample]);
 
 ~samplePlayer.set(\volumeMod, 0.3);
-~samplePlayer.set(\rateMod, 1.2);
+~samplePlayer.set(\rateMod, 1.5);
 
 2.0.wait;
 ~samplePlayer = Synth.new(\samplePlayer2, [\bufnum, soundSample]);
@@ -141,7 +125,7 @@ fork({
 
 2.0.wait;
 ~samplePlayer = Synth.new(\samplePlayer4, [\bufnum, soundSample2]);
-~samplePlayer.set(\volumeMod, 0.7);
+~samplePlayer.set(\volumeMod, 4.0);
 
 
 });
