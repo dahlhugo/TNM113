@@ -1,4 +1,8 @@
+
+
 (
+s.record("S:/TNM113/TNM113/Lab2/ljud1.wav");
+
 ~tempoInBPM = 120;
 ~tempoClock = TempoClock.new(~tempoInBPM/60, 4);
 
@@ -39,3 +43,5 @@ Pdef(
 
 ServerMeter.new(s, 0, 2);
 s.scope;
+
+s.stopRecording;
