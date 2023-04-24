@@ -10,10 +10,13 @@ s.scope;
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 SynthDef(\distanceSonification, { arg freq = 330, level = 0;
-	var output = LFSaw.ar(freq) * level.lag(1)*0.3;
 
+	var output = LFSaw.ar(freq) * level.lag(1);
+	var amMod = LFPulse.ar(1, width: 0.001);
 
+	var env = EnvGen.ar(Env.perc(0.01, 1.0), gate: amMod);
 
+	output = output * env;
 
 	Out.ar(0, {output}!2);
 }).add;
