@@ -15,8 +15,8 @@ SynthDef(\bassDrum, {
 	body = SinOsc.ar(75);
 	body = body * EnvGen.ar(Env.perc(0.01, 0.1));
 
-	hit = LFTri.ar(220);
-	hit = hit * EnvGen.ar(Env.perc(0.01, 0.01));
+	hit = LFPulse.ar(220) * 0.10;
+	hit = hit * EnvGen.ar(Env.perc(0.01, 0.01, 1, -4));
 
 	output = body + (hit/3);
 	output = output *0.5;
@@ -39,7 +39,7 @@ SynthDef(\snareDrum, {
 	noise = noise * EnvGen.ar(Env.perc(0, 0.1));
 
 	output = body + hit + noise;
-	output = output *0.5;
+	output = output * 0.5;
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -48,13 +48,14 @@ SynthDef(\clHiHat, {
 	var output, noise, tones;
 
 	noise = WhiteNoise.ar(0.25);
-	noise = HPF.ar(noise, 3500);
-
-	tones = (LFPulse.ar(2000, 0.0, 0.5) + LFPulse.ar(1150, 0.0, 0.5) + LFPulse.ar(820, 0.0, 0.5) + LFPulse.ar(465, 0.0, 0.5))/4;
+	tones = LFPulse.ar(2000) + LFPulse.ar(1150) + LFPulse.ar(820) + LFPulse.ar(465);
+	tones = tones/4;
 	noise = noise + (tones/2);
 
-	noise = noise * EnvGen.ar(Env.perc(0.05, 0.02, 1, -1));
+	noise = HPF.ar(noise, 1750);
+	noise = noise * EnvGen.ar(Env.perc(0.005, 0.025, 1, -1));
 
+	output = noise;
 
 	output = noise;
 	output = output * 0.5;
@@ -63,18 +64,17 @@ SynthDef(\clHiHat, {
 }).add;
 
 SynthDef(\opHiHat, {
-	var output, noise;
+	var output, noise, tones;
 
 	noise = WhiteNoise.ar(0.25);
-	noise = HPF.ar(noise, 3500);
-
-	tones = (LFPulse.ar(2000, 0.0, 0.5) + LFPulse.ar(1150, 0.0, 0.5) + LFPulse.ar(820, 0.0, 0.5) + LFPulse.ar(465, 0.0, 0.5))/4;
+	tones = LFPulse.ar(2000) + LFPulse.ar(1150) + LFPulse.ar(820) + LFPulse.ar(465);
+	tones = tones/4;
 	noise = noise + (tones/2);
 
-	noise = noise * EnvGen.ar(Env.perc(0.05, 0.2));
+	noise = HPF.ar(noise, 3500);
+	noise = noise * EnvGen.ar(Env.perc(0.05, 0.05, 1, -1));
 
 	output = noise;
-	output = output * 0.5;
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -82,7 +82,7 @@ SynthDef(\opHiHat, {
 )
 
 (
-~samplePlayer = Synth.new(\snareDrum);
+	~samplePlayer = Synth.new(\opHiHat);
 )
 
 
