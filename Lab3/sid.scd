@@ -9,8 +9,11 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\distanceSonification, { arg freq = 220, level = 0;
-	var output = LFTri.ar(freq) * level.lag(1);
+SynthDef(\distanceSonification, { arg freq = 330, level = 0;
+	var output = LFSaw.ar(freq) * level.lag(1)*0.3;
+
+
+
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -39,7 +42,7 @@ SynthDef(\sendMouse, {
 	case
 	// För avstånd kortare än 30cm
 	{ distance <= 30 } {
-		level = 1;
+		level = 2;
 	}
 	// För avstånd kortare än 3 meter
 	{ distance <= 300 } {
