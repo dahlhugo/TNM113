@@ -9,12 +9,12 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\distanceSonification, { arg freq = 440, level = 0;
+SynthDef(\distanceSonification, { arg freq = 440, level = 0, rel = 1.0;
 
-	var output = SinOsc.ar(freq ) * level.lag(1);
-	var amMod = LFPulse.ar(2 + (level * 1) , width: 0.01);
+	var output = SinOsc.ar(freq) * level.lag(1) * 0.5;
+	var amMod = LFPulse.ar(1 + (level * 1) , width: 0.01);
 
-	var env = EnvGen.ar(Env.perc(0.01, 1.0), gate: amMod);
+	var env = EnvGen.ar(Env.perc(0.01, rel), gate: amMod);
 
 	output = output * env;
 
@@ -50,6 +50,7 @@ SynthDef(\sendMouse, {
 	// För avstånd kortare än 3 meter
 	{ distance <= 300 } {
 		level = 1;
+		~distanceSynth.set(\rel, 200 / distance );
 	}
 	// För avstånd längre än 3 meter
 	{ distance > 300 } {
