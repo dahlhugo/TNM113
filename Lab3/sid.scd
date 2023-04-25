@@ -50,7 +50,7 @@ SynthDef(\sendMouse, {
 	// För avstånd kortare än 3 meter
 	{ distance <= 300 } {
 		level = 1;
-		~distanceSynth.set(\rel, 200 / distance );
+		~distanceSynth.set(\rel, 300 / distance );
 	}
 	// För avstånd längre än 3 meter
 	{ distance > 300 } {
@@ -131,6 +131,9 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 }, '/mousePosition'); // Detta gör att OSCFunc lyssnar efter muspositionen
 // Följande stänger fönstret och OSC-lyssnaren när man stänger av processen i
 // SC med <ctrl> & <enter> i Windows och <cmd> & <enter> i MacOS
+
+s.record("C:/Users/hugod/development/TNM113/Lab3/ljud.wav");
+
 CmdPeriod.doOnce({
 	w.free;
 	w.close;
