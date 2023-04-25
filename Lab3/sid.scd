@@ -9,10 +9,10 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\distanceSonification, { arg freq = 330, level = 0;
+SynthDef(\distanceSonification, { arg freq = 440, level = 0;
 
-	var output = LFSaw.ar(freq) * level.lag(1);
-	var amMod = LFPulse.ar(1, width: 0.001);
+	var output = SinOsc.ar(freq ) * level.lag(1);
+	var amMod = LFPulse.ar(2 + (level * 1) , width: 0.01);
 
 	var env = EnvGen.ar(Env.perc(0.01, 1.0), gate: amMod);
 
@@ -31,7 +31,7 @@ SynthDef(\sendMouse, {
 
 (
 // Följande registrerar distanceSonification synthdefinitionen på servern
-~distanceSynth = Synth.new(\distanceSonification).register;
+~distanceSynth = Synth.new(\distanceSonification, [\frequency, 330]).register;
 
 // Denna funktion är den som tar emot avståndet mellan bilen och lampan,
 // och som ska användas för att mappa avståndet till olika mått och sedan
@@ -39,7 +39,7 @@ SynthDef(\sendMouse, {
 ~adjustTheSonification = { arg distance; // distance är inputargumentet
 	// Deklarera variabler först
 	var level;
-	// Skriv ut avståndet i Post window
+	// Skriv ut avståndet i Post window'
 	("The distance is:" + distance ++ "cm").postln;
 	// Använd case för att ändra/mappa avståndet till olika andra värden
 	case
