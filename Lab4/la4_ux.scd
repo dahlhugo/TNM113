@@ -12,9 +12,6 @@ s.scope;
 SynthDef(\dataSonification, { arg freq;
 	var output = LFTri.ar(freq);
 
-
-
-
 	// C, Eb, F, G, Bb
 ~originalTones = [12, 15, 17, 19, 22];
 ~quantTones = ~originalTones;
@@ -27,18 +24,35 @@ for (0, 7) { arg index;
 
 SynthDef(\levelSonification, { arg level;
 	var output;
-	var detune = level * 2;
+	var sine;
+	var amMod;
 
-	var sine1 = 0;
-	var sine2 = 0;
+	if(level == 0) {
+		sine = SinOsc.ar(1020) * 0.0;
+		output = sine;
+	};
 
 	if(level != 0) {
-		sine1 = SinOsc.ar(820 + detune);
-		sine2 = SinOsc.ar(820 - detune);
+		sine = SinOsc.ar(1020 + (200 * level) );
+
+		amMod = LFPulse.ar(1 + (level * 2), width: 0.1).range(0, 1);
+
+		output = sine * EnvGen.ar(Env.perc(0.01, 1.0), gate: amMod);
 	};
 
 
-	output = (sine1 + sine2) * 0.1;
+
+
+	output = output * 0.2;
+
+	Out.ar(0, {output}!2);
+}).add;
+
+SynthDef(\errorSonification, { arg msg;
+
+
+	var output = LFSaw.ar(freq: 440.0, width: 0.5) * 0.3 * EnvGen(Env.perc);
+
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -50,6 +64,7 @@ SynthDef(\levelSonification, { arg level;
 // Följande registrerar dataSonification synthdefinitionen på servern
 ~dataSynth = Synth.new(\dataSonification).register;
 ~levelSynth = Synth.new(\levelSonification).register;
+~errorSynth = Synth.new(\errorSonification).register;
 
 // Följande är en OSC-lyssnare för level-meddelanden
 OSCdef(\levelListener, { arg inputmsg;
@@ -60,7 +75,6 @@ OSCdef(\levelListener, { arg inputmsg;
 			// och sparar i environment-variabeln
 
 			~statusLevel = inputmsg[1].asInteger;
-			//~handleLevel.value(~statusLevel);
 
 			//skicka level värde till synthdefinition
 			~levelSynth.set(\level, ~statusLevel);
@@ -95,9 +109,10 @@ OSCdef(\errorListener, { arg inputmsg;
 		// och sparar i environment-variabeln
 		~errorMessage = inputmsg[1];
 		~errorMessage.postln;
+
+		~errorSynth.set(\msg, ~errorMessage);
 	};
 }, 'error');
-
 
 /*~handleLevel = { arg level;
 	//olika ljud med stor skillnad för varje level
