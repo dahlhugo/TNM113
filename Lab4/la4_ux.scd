@@ -48,11 +48,16 @@ SynthDef(\levelSonification, { arg level;
 	Out.ar(0, {output}!2);
 }).add;
 
-SynthDef(\errorSonification, { arg msg;
+SynthDef(\errorSonification, { arg err;
+	var output;
 
+	if(err == 1){
+		output = LFSaw.ar(freq: 440.0) * 0.1;
+	};
 
-	var output = LFSaw.ar(freq: 440.0, width: 0.5) * 0.3 * EnvGen(Env.perc);
-
+	if(err == 0){
+		output = LFSaw.ar(freq: 440.0) * 0.0;
+	};
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -62,10 +67,10 @@ SynthDef(\errorSonification, { arg msg;
 
 (
 // Följande registrerar dataSonification synthdefinitionen på servern
-~dataSynth = Synth.new(\dataSonification).register;
-~levelSynth = Synth.new(\levelSonification).register;
+//~dataSynth = Synth.new(\dataSonification).register;
+//~levelSynth = Synth.new(\levelSonification).register;
 ~errorSynth = Synth.new(\errorSonification).register;
-
+/*
 // Följande är en OSC-lyssnare för level-meddelanden
 OSCdef(\levelListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
@@ -100,7 +105,7 @@ OSCdef(\dataListener, { arg inputmsg;
 			~dataSynth.set(\freq, frequency);
 		};
 	};
-}, 'data');
+}, 'data'); */
 
 // Följande är en OSC-lyssnare för fel-meddelanden
 OSCdef(\errorListener, { arg inputmsg;
@@ -108,10 +113,15 @@ OSCdef(\errorListener, { arg inputmsg;
 		// Detta plockar ut felmeddelandet ur meddelandet
 		// och sparar i environment-variabeln
 		~errorMessage = inputmsg[1];
-		~errorMessage.postln;
+		//~errorMessage.postln;
 
-		~errorSynth.set(\msg, ~errorMessage);
+		~errorSynth.set(\err, 1);
 	};
+
+	if(inputmsg.size < 1){
+		~errorSynth.set(\err, 0);
+	}
+
 }, 'error');
 
 /*~handleLevel = { arg level;
@@ -128,6 +138,7 @@ OSCdef(\errorListener, { arg inputmsg;
 	frequency.value;
 };
 
+/*
 ~mapTones = { arg freq;
 	var incomingNote = freq.cpsmidi;
 	var comparisonValue;
@@ -145,7 +156,7 @@ OSCdef(\errorListener, { arg inputmsg;
 	};
 	mappedFreq = ~quantTones[notePosition].midicps;
 	mappedFreq.value;
-};
+};*/
 )
 
 // Följande rad kollar vilken lokal address som OSC-lyssnaren använder. Denna måste

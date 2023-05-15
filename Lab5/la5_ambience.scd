@@ -197,18 +197,21 @@ OSCdef(\timeListener, { arg inputmsg;
 
 			~chordLevel = 0.25;
 			~bassLevel = 0.5;
+			~tempoInBPM = 70;
 		},
 		17, { // Evening
 			~playbell.value;
 
-			~chordLevel = 0.5;
+			~chordLevel = 0.1;
 			~bassLevel = 1;
+			~tempoInBPM = 60;
 		},
 		20, { // Happy hour
 			~playbell.value;
 
-			~chordLevel = 1;
-			~bassLevel = 1;
+			~chordLevel = 2;
+			~bassLevel = 2;
+			~tempoInBPM = 55;
 		},
 		23, { // Closed
 			~playbell.value;
