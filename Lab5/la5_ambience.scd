@@ -47,8 +47,36 @@ SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 		rate: BufRateScale.kr(bufnum),
 		trigger: 1,
 		startPos: 0,
+		loop: 1,
+		doneAction: 2
+	);
+	var output = sound * 0.02 * level;
+	output = BHiShelf.ar(output, freq: 1000, rs: 0.5, db: 9);
+	Out.ar(bus, {output}!2);
+}).add;
+SynthDef(\grindSamplePlayer, { arg bus, bufnum = 0, level = 0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: 1,
+		startPos: 0,
 		loop: 0,
 		doneAction: 2
+	);
+	var output = sound * 0.02 * level;
+	output = BHiShelf.ar(output, freq: 1000, rs: 0.5, db: 9);
+	Out.ar(bus, {output}!2);
+}).add;
+
+SynthDef(\songSamplePlayer, { arg bus, bufnum = 0, rate = 1.0, level = 0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: rate,
+		trigger: 1,
+		startPos: 0,
+		loop: 1,
 	);
 	var output = sound * 0.02 * level;
 	output = BHiShelf.ar(output, freq: 1000, rs: 0.5, db: 9);
@@ -65,9 +93,9 @@ SynthDef(\outputEffects, {arg inputbus, bus;
 	var output = input + (roomEffects * 0.75);
 	Out.ar(bus, output);
 }).add;
-SynthDef(\outputChannel, {arg inputbus, level = 0.5;
+SynthDef(\outputChannel, {arg inputbus, rate = 0.5;
 	var output = In.ar(inputbus, numChannels: 2);
-	output = output * level;
+
 
 	Out.ar(0, output);
 }).add;
@@ -83,7 +111,7 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 
 
 // Toner i ackordet 0 = C, Eb, G; 1 = C, D, G; 2 = C, F, G; 3 = D, G, B
-~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
+/*~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
 ~chordNumber = 0;
 // Skapa ett dictionary för att stoppa ackordsyntarna i
 ~chordSynthDictionary = Dictionary.new;
@@ -91,21 +119,26 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 for (0, 2) { arg index;
 	~chordSynthDictionary.add(index -> Synth.new(\chordSynth, [\bus, ~outputEffectBus.index;]).register);
 };
-~chordLevel = 0.25;
+~chordLevel = 0.25;*/
 
 
 // Toner i basen C, C, F, G
-~bassNoteNumbersToUse = [60, 50, 53, 55];
+/*~bassNoteNumbersToUse = [60, 50, 53, 55];
 // Registera bassynten på servern och skicka med effektbussen
 ~bassSynth = Synth.new(\bassSynth, [~outputEffectBus.index;]).register;
-~bassLevel = 0;
+~bassLevel = 0;*/
+
+~songLevel = 0.25;
+//~songSynth = Synth.new(\songSamplePlayer, [\bufnum, ~songSample, \bus, ~outputEffectBus.index, \level, ~songLevel;]);
 
 
 // Läs in klockljudet, ni får se över sökvägen till de ljud ni använder
 ~bellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/bell2.wav");
 // Läs in dörrklockljudet
 ~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/doorbell2.wav");
-
+//Music sample
+~songSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/song.wav");
+~grindSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/grind.wav");
 
 // En environmentvariabel som håller koll på antal personer i lobbyn
 ~numberOfPersons = 0;
@@ -123,36 +156,28 @@ for (0, 2) { arg index;
 	~tempoClock.schedAbs(0, {
 		// Om ~beatCounter är på första slaget, 1, sätt rätt toner till syntarna
 		if (~beatCounter == 1) {
-			~chordSynthDictionary.size.do{ arg index;
-				~chordSynthDictionary.at(index).set(\freq, ~chordDictionary[~chordNumber][index].midicps, \level, ~chordLevel, \gate, 1);
-			};
-			~bassSynth.set(\freq, ~bassNoteNumbersToUse[~chordNumber].midicps, \level, ~bassLevel, \gate, 1);
+
 		};
 		// Räkna sedan upp ~beatCounter
 		~beatCounter = ~beatCounter + 1;
 		// Om ~beatCounter är 9 har de 8 taktslagen för ackordet gjorts
 		// Släpp upp "tangenterna" för syntarna
 		if (~beatCounter == 9) {
-			~chordSynthDictionary.size.do{ arg index;
-				~chordSynthDictionary.at(index).set(\gate, 0);
-			};
-			~bassSynth.set(\gate, 0);
+
 			// Kolla om ~stopFlag och första ackordet gäller, stoppa då uppspelningen
-			if ((~stopflag) && (~chordNumber == 0)) {
+			if ((~stopflag)) {
 				~tempoClock.stop;
+				~songSynth.free;
 			};
-			// Räkna upp ~chordNumner så att nästa ackord används
-			~chordNumber = ~chordNumber + 1;
-			// Det är bara fyra ackord, börja om från första ackordet om det behövs
-			if (~chordNumber > 3) {
-				~chordNumber = 0;
-			};
+
 			// Och återställ ~beatCounter till 1
 			~beatCounter = 1;
 		};
 		1.0; // 1.0 innebär att schedAbs klockas i fjärdedelar av en takt
 	});
 };
+
+
 
 
 // Följande är en OSC-lyssnare för tids-meddelanden
@@ -163,6 +188,8 @@ OSCdef(\timeListener, { arg inputmsg;
 			~startFlag = false;
 			~tempoClock = TempoClock.new(~tempoInBPM/60);
 			~sequencingFunction.value();
+			~songSynth = Synth.new(\songSamplePlayer, [\bufnum, ~songSample, \bus, ~outputEffectBus.index, \level, ~songLevel;]);
+
 		};
 		// Uppdatera ~hour med inkommande OSC-meddelande
 		~hour = inputmsg[1];
@@ -182,36 +209,49 @@ OSCdef(\timeListener, { arg inputmsg;
 			// Spela upp klockljudet som markerar de olika tidsdelarna
 			~playbell.value;
 
+
 			// Sätt ljudvolymen för de procedurella syntarna, vilken sedan sätts i sequencerfunktionen
-			~chordLevel = 0.25;
-			~bassLevel = 0;
+			~songLevel = 0.25;
+			//~bassLevel = 0;
+
+
+
 		},
 		11, { // Lunch
 			~playbell.value;
 
-			~chordLevel = 0.5;
-			~bassLevel = 0.25;
+			~songLevel = 0.5;
+			~songSynth.set(\rate, 1.05);
+			//~bassLevel = 0.25;
+			//~songSynth.free;
+
+
 		},
 		13, { // Afternoon
 			~playbell.value;
 
-			~chordLevel = 0.25;
+			~songSynth.set(\rate, 1.10);
+
 			~bassLevel = 0.5;
 			~tempoInBPM = 70;
+
 		},
 		17, { // Evening
 			~playbell.value;
 
-			~chordLevel = 0.1;
+			~songSynth.set(\rate, 1.15);
 			~bassLevel = 1;
 			~tempoInBPM = 60;
+
 		},
 		20, { // Happy hour
 			~playbell.value;
 
-			~chordLevel = 2;
+			~songLevel = 2;
 			~bassLevel = 2;
 			~tempoInBPM = 55;
+			~playGrind.value;
+
 		},
 		23, { // Closed
 			~playbell.value;
@@ -224,9 +264,10 @@ OSCdef(\timeListener, { arg inputmsg;
 
 
 // Följande funktion spelar upp klockljudet, eftersom synthdefinitionen har en doneAction på 2 tas den syntinstansen bort från servern när samplingen har spelats upp. Därför kan vi bekvämt skapa en ny instans varje gång vi spelar upp ljudet.
-~playbell = {
-	Synth.new(\bellSamplePlayer, [\bufnum, ~bellSample, \bus, ~outputEffectBus.index, \level, 1;]);
+~playGrind = {
+	Synth.new(\grindSamplePlayer, [\bufnum, ~grindSample, \bus, ~outputEffectBus.index, \level, 1;]);
 };
+
 
 
 // Följande är en OSC-lyssnare för person-meddelanden. Meddelandet tas emot som en int (inputPerson) och om det värdet är större än ~numberOfPersons ska ett ljud spelas upp. Därefter uppdateras ~numberofPersons. Även denna synthdefinition har en doneAction på 2.
@@ -245,8 +286,8 @@ OSCdef(\personListener, { arg inputmsg;
 OSCdef(\temperatureListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
 		var inputTemperature = inputmsg[1].asFloat;
-		inputTemperature = linlin(inputTemperature, 19.7, 22.3, 0.3, 1);
-		~outputChannel.set(\level, inputTemperature);
+		inputTemperature = linlin(inputTemperature, 19.7, 22.3, 0.5, 1.5);
+		~songSynth.set(\level, inputTemperature);
 	};
 }, 'temperature');
 
