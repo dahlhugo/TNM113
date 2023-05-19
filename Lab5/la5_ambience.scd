@@ -37,7 +37,7 @@ SynthDef(\doorbellSamplePlayer, { arg bus, bufnum = 0, t_gate = 0, level = 0;
 		loop: 0,
 		doneAction: 2
 	);
-	var output = sound * 0.015 * level;
+	var output = sound * 0.07 * level;
 	Out.ar(bus, {output}!2);
 }).add;
 SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
@@ -135,7 +135,7 @@ for (0, 2) { arg index;
 // Läs in klockljudet, ni får se över sökvägen till de ljud ni använder
 ~bellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/bell2.wav");
 // Läs in dörrklockljudet
-~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/pour.wav");
+~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/pour2.wav");
 //Music sample
 ~songSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/song.wav");
 ~grindSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/grind.wav");
@@ -151,7 +151,7 @@ for (0, 2) { arg index;
 ~oldHour = 0; // En variabel som används för att kolla om timmen som kommer via OSC är en ny timme eller inte
 
 
-// Här följer sequencerfunktionen. Den anropas efter att det första OSC-meddelandet tagits emot och tempoklockan har startats. Sequencern räknar till 8 slag, dvs två takter, när det 9 slaget kommer ska syntarnas "tangenter" släppas (dvs gate sätts till 0), och uppspelningen börjar om från 1 men med nästa ackord. När det fjärde ackordet tas, dvs ~chordNumner är större än 3, ska ackordordningen börja om från det första ackordet. När allt är klart, dvs ~stopFlag har satts till true, ska ackorden gå klart och det första ackordet spelas upp igen så att "låten" avslutas med rätt ackord.
+// Här följer sequencerfunktionen. Den anropas efter att det första OSC-meddelandet tagits emot och tempoklockan har startats. Sequencern räknar till 8 slag, dvs två takter, när det 9 slaget kommer ska syntarnas "tangenter" släppas (dvs gate sätts till 0), och uppspelningen börjar om från 1 men med nästa ackord. När det fjärde ackordet tas, dvs ~chordNumner är större än 3, ska ackordordningen börja om från det första ackordet. När allt är klart, dvs ~stopFlag har satts till true, ska ackorden gå klart och det första ackordet spelas upp igen s.å att "låten" avslutas med rätt ackord.
 ~sequencingFunction = {
 	~tempoClock.schedAbs(0, {
 		// Om ~beatCounter är på första slaget, 1, sätt rätt toner till syntarna
