@@ -135,7 +135,7 @@ for (0, 2) { arg index;
 // Läs in klockljudet, ni får se över sökvägen till de ljud ni använder
 ~bellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/bell2.wav");
 // Läs in dörrklockljudet
-~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/doorbell2.wav");
+~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/pour.wav");
 //Music sample
 ~songSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/song.wav");
 ~grindSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/grind.wav");
