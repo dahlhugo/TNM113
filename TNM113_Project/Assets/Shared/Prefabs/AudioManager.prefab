@@ -314,3 +314,8 @@ MonoBehaviour:
     m_AudioClip: {fileID: 8300000, guid: 2746e40e99d6a496d9138c980ca19aa2, type: 3}
   - m_SoundID: 3
     m_AudioClip: {fileID: 8300000, guid: 93827af2766564d40857b36eab1cf07f, type: 3}
+  m_MessageSounds:
+  - m_SoundID: 1
+    m_soundMessage: /coin
+  - m_SoundID: 2
+    m_soundMessage: /key

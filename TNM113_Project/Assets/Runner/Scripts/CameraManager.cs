@@ -11,6 +11,7 @@ namespace HyperCasual.Runner
     [ExecuteInEditMode]
     public class CameraManager : MonoBehaviour
     {
+        
         /// <summary>
         /// Returns the CameraManager.
         /// </summary>

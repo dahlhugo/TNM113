@@ -22,11 +22,11 @@ namespace HyperCasual.Runner
         [SerializeField]
         GenericGameEventListener m_LoseEventListener;
 
-        int m_TempGold;
+        public int m_TempGold;
         int m_TotalGold;
         float m_TempXp;
         float m_TotalXp;
-        int m_TempKeys;
+        public int m_TempKeys;
 
         /// <summary>
         /// Temporary const

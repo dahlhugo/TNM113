@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using extOSC;
 using UnityEditor;
 using UnityEngine;
 
@@ -184,6 +185,8 @@ namespace HyperCasual.Runner
         {
             m_TargetScale += Vector3.one * scale;
             m_TargetScale = Vector3.Max(m_TargetScale, Vector3.one * k_MinimumScale);
+            
+            AudioManager.SendMessage("/scale", m_TargetScale.x);
         }
 
         /// <summary>

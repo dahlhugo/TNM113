@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using extOSC;
 using HyperCasual.Core;
 using UnityEngine;
 using AudioSettings = HyperCasual.Core.AudioSettings;
+
 
 namespace HyperCasual.Runner
 {
@@ -19,17 +21,30 @@ namespace HyperCasual.Runner
             public AudioClip m_AudioClip;
         }
 
+        [Serializable]
+        class SoundIDMessagePair
+        {
+            public SoundID m_SoundID;
+            public string m_soundMessage;
+        }
+        
         [SerializeField]
         AudioSource m_MusicSource;
         [SerializeField]
         AudioSource m_EffectSource;
-        [SerializeField, Min(0f)]
-        float m_MinSoundInterval = 0.1f;
+        [SerializeField, Min(0f)] static float m_MinSoundInterval = 0.1f;
         [SerializeField]
         SoundIDClipPair[] m_Sounds;
+        
+        [SerializeField]
+        SoundIDMessagePair[] m_MessageSounds;
 
-        float m_LastSoundPlayTime;
+        private static OSCTransmitter transmitter;
+
+
+        static float m_LastSoundPlayTime;
         readonly Dictionary<SoundID, AudioClip> m_Clips = new();
+        private readonly Dictionary<SoundID, string> m_Messages = new();
 
         AudioSettings m_AudioSettings = new();
 
@@ -74,9 +89,18 @@ namespace HyperCasual.Runner
 
         void Start()
         {
+            transmitter = gameObject.AddComponent<OSCTransmitter>();
+            transmitter.RemoteHost = "127.0.0.1";
+            transmitter.RemotePort = 57120; 
+            
             foreach (var sound in m_Sounds)
             {
                 m_Clips.Add(sound.m_SoundID, sound.m_AudioClip);
+            }
+
+            foreach (var message in m_MessageSounds)
+            {
+                m_Messages.Add(message.m_SoundID, message.m_soundMessage);
             }
         }
 
@@ -157,5 +181,37 @@ namespace HyperCasual.Runner
             
             PlayEffect(m_Clips[soundID]);
         }
+
+        public void SendMessage(SoundID soundID)
+        {
+            if (soundID == SoundID.None)
+                return;
+
+            int value = -2000;
+
+            if (soundID == SoundID.CoinSound)
+            {
+                value = Inventory.Instance.m_TempGold;
+            }
+
+            if(soundID == SoundID.KeySound)
+            {
+                value = Inventory.Instance.m_TempKeys;
+            }
+            
+            SendMessage(m_Messages[soundID], value);
+        }
+
+        public static void SendMessage(string soundMessage, float value)
+        {
+            
+            if (Time.time - m_LastSoundPlayTime >= m_MinSoundInterval)
+            {
+                var message = new OSCMessage(soundMessage);
+                if(value != -2000) message.AddValue(OSCValue.Float(value));
+                transmitter.Send(message);
+            }
+        }
+        
     }
 }

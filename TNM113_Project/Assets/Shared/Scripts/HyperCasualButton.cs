@@ -57,7 +57,7 @@ namespace HyperCasual.Runner
 
         protected void PlayButtonSound()
         {
-            AudioManager.Instance.PlayEffect(m_ButtonSound);
+           //AudioManager.Instance.PlayEffect(m_ButtonSound);
         }
     }
 }

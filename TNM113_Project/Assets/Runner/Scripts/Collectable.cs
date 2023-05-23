@@ -67,7 +67,10 @@ namespace HyperCasual.Runner
             }
 
             m_Collected = true;
-            AudioManager.Instance.PlayEffect(m_Sound);
+            
+            //AudioManager.Instance.PlayEffect(m_Sound);
+            AudioManager.Instance.SendMessage(m_Sound);
+
         }
     }
 }
