@@ -113,12 +113,14 @@ thisProcess.openUDPPort(57120);
 ~comboSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/combo.wav");
 ~applauseSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/applause.wav");
 
-
+~speed = 1;
 
 OSCdef(\CoinOSC, {|msg|
 	Pbind(
 	\degree, Pseq(#[7, 12, 19], 1),
-		\dur, Pseq(#[0.01, 0.1, 0.1], 1)).play;
+		\dur, Pseq(#[0.2, 0.5, 0.5], 1),
+	\tempo, 0.5 * ~speed
+	).play;
 }, '/coin');
 
 
@@ -145,19 +147,20 @@ OSCdef(\ScaleOSC, {|msg|
 
 }, '/scale');
 
-/*OSCdef(\ComboOSC, {|msg|
-	msg.postln;
-
-
-	Synth.new(\comboSamplePlayer, [\bufnum, ~comboSample, \level, 0.3;]);
+OSCdef(\ComboOSC, {|msg|
+	var value = msg[1];
+	~speed = value;
+	~speed.postln;
+	//Synth.new(\comboSamplePlayer, [\bufnum, ~comboSample, \level, 0.3;]);
 
 	//Synth.new(\scaleSonification, [\scale, scale, \volumeMod, volumeMod]);
 
-}, '/combo');*/
+}, '/combo');
 
 OSCdef(\WinOSC, {|msg|
 		Synth.new(\applauseSamplePlayer, [\bufnum, ~applauseSample, \level, 0.2;]);
 }, '/win');
+
 
 
 )
