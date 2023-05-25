@@ -27,6 +27,9 @@ namespace HyperCasual.Runner
         float m_TempXp;
         float m_TotalXp;
         public int m_TempKeys;
+        public int m_CurrentCombo;
+        private float LastGoldPickedUpAt;
+        private int m_ComboCounter;
 
         /// <summary>
         /// Temporary const
@@ -52,6 +55,9 @@ namespace HyperCasual.Runner
             m_TempXp = 0;
             m_TotalXp = SaveManager.Instance.XP;
             m_TempKeys = 0;
+            m_CurrentCombo = 0;
+            LastGoldPickedUpAt = 0.0f;
+            m_ComboCounter = 0;
 
             m_LevelCompleteScreen = UIManager.Instance.GetView<LevelCompleteScreen>();
             m_Hud = UIManager.Instance.GetView<Hud>();
@@ -79,11 +85,37 @@ namespace HyperCasual.Runner
             {
                 m_TempGold += goldPickedEvent.Count;
                 m_Hud.GoldValue = m_TempGold;
+                
+                
+                var currentGoldPickedUpAt = Time.time;
+
+                if (currentGoldPickedUpAt - LastGoldPickedUpAt  < 0.5f)
+                {
+                    if (m_ComboCounter <= 9)
+                    {
+                        m_ComboCounter++;
+                        if( m_ComboCounter % 3 == 0 && m_ComboCounter != 0)
+                        {
+                            m_CurrentCombo++;
+                            AudioManager.SendMessage("/combo", m_CurrentCombo);
+                        }
+                    }
+                } else
+                {
+                    m_CurrentCombo = 0;
+                    m_ComboCounter = 0;
+                }
+                LastGoldPickedUpAt = currentGoldPickedUpAt;
+                
+                
             }
             else
             {
                 throw new Exception($"Invalid event type!");
             }
+            
+
+            
         }
 
         void OnKeyPicked()
@@ -100,6 +132,7 @@ namespace HyperCasual.Runner
 
         void OnWin()
         {
+            AudioManager.SendMessage("/win", 1);
             m_TotalGold += m_TempGold;
             m_TempGold = 0;
             SaveManager.Instance.Currency = m_TotalGold;
