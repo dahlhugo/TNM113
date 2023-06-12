@@ -118,7 +118,7 @@ thisProcess.openUDPPort(57120);
 OSCdef(\CoinOSC, {|msg|
 	Pbind(
 	\degree, Pseq(#[7, 12, 19], 1),
-		\dur, Pseq(#[0.2, 0.5, 0.5], 1),
+	\dur, Pseq(#[0.1, 0.3, 0.3], 1),
 	\tempo, 0.5 * ~speed
 	).play;
 }, '/coin');
@@ -127,9 +127,7 @@ OSCdef(\CoinOSC, {|msg|
 OSCdef(\KeyOSC, {|msg|
 	Pbind(
 	\degree, Pseq(#[12, 17, 17, 19], 1),
-		\dur, Pseq(#[0.1, 0.01, 0.01, 0.2], 1)).play;
-
-	//msg.postln
+	\dur, Pseq(#[0.1, 0.01, 0.01, 0.2], 1)).play;
 }, '/key');
 
 OSCdef(\ScaleOSC, {|msg|
@@ -150,10 +148,6 @@ OSCdef(\ScaleOSC, {|msg|
 OSCdef(\ComboOSC, {|msg|
 	var value = msg[1];
 	~speed = value;
-	~speed.postln;
-	//Synth.new(\comboSamplePlayer, [\bufnum, ~comboSample, \level, 0.3;]);
-
-	//Synth.new(\scaleSonification, [\scale, scale, \volumeMod, volumeMod]);
 
 }, '/combo');
 

@@ -13,12 +13,12 @@ SynthDef(\dataSonification, { arg freq;
 	var output = LFTri.ar(freq);
 
 	// C, Eb, F, G, Bb
-~originalTones = [12, 15, 17, 19, 22];
-~quantTones = ~originalTones;
-for (0, 7) { arg index;
-	~originalTones = ~originalTones + 12;
-	~quantTones = ~quantTones.addAll(~originalTones);
-};
+	~originalTones = [12, 15, 17, 19, 22];
+	~quantTones = ~originalTones;
+	for (0, 7) { arg index;
+		~originalTones = ~originalTones + 12;
+		~quantTones = ~quantTones.addAll(~originalTones);
+	};
 	Out.ar(0, {output}!2);
 }).add;
 
@@ -41,23 +41,44 @@ SynthDef(\levelSonification, { arg level;
 	};
 
 
-
-
 	output = output * 0.2;
 
 	Out.ar(0, {output}!2);
 }).add;
 
-SynthDef(\errorSonification, { arg err;
+SynthDef(\biLow, {
 	var output;
 
-	if(err == 1){
-		output = LFSaw.ar(freq: 440.0) * 0.1;
-	};
+	output = SinOsc.ar(freq: 440.0)´;
 
-	if(err == 0){
-		output = LFSaw.ar(freq: 440.0) * 0.0;
-	};
+	output = output * EnvGen.ar(Env.perc(0.05, 0.05, 1, -1));
+
+	Out.ar(0, {output}!2);
+}).add;
+
+SynthDef(\riskOverheat, {
+	var output;
+
+	output = LFSaw.ar(freq: 440.0);
+	output = output * EnvGen.ar(Env.perc(0.05, 0.05, 1, -1));
+
+	Out.ar(0, {output}!2);
+}).add;
+
+SynthDef(\zeroNull, {
+	var output;
+
+	output = SinOsc.ar(freq: 220.0);
+	output = output * EnvGen.ar(Env.perc(0.05, 0.05, 1, -1));
+
+	Out.ar(0, {output}!2);
+}).add;
+
+SynthDef(\unstOutput, {
+	var output;
+
+	output = LFPulse.ar(freq: 880.0);
+	output = output * EnvGen.ar(Env.perc(0.05, 0.05, 1, -1));
 
 	Out.ar(0, {output}!2);
 }).add;
@@ -68,9 +89,8 @@ SynthDef(\errorSonification, { arg err;
 (
 // Följande registrerar dataSonification synthdefinitionen på servern
 //~dataSynth = Synth.new(\dataSonification).register;
-//~levelSynth = Synth.new(\levelSonification).register;
-~errorSynth = Synth.new(\errorSonification).register;
-/*
+~levelSynth = Synth.new(\levelSonification).register;
+
 // Följande är en OSC-lyssnare för level-meddelanden
 OSCdef(\levelListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
@@ -105,22 +125,36 @@ OSCdef(\dataListener, { arg inputmsg;
 			~dataSynth.set(\freq, frequency);
 		};
 	};
-}, 'data'); */
+}, 'data');
+
 
 // Följande är en OSC-lyssnare för fel-meddelanden
 OSCdef(\errorListener, { arg inputmsg;
-	if (inputmsg.size > 1) {
-		// Detta plockar ut felmeddelandet ur meddelandet
-		// och sparar i environment-variabeln
-		~errorMessage = inputmsg[1];
-		//~errorMessage.postln;
+	~errorMessage = inputmsg[1];
+	~errorMessage.postln;
 
-		~errorSynth.set(\err, 1);
-	};
+	switch (~errorMessage)
+		{'Bipolar capacity low'} {
+			 Synth.new(\biLow).register;
 
-	if(inputmsg.size < 1){
-		~errorSynth.set(\err, 0);
-	}
+		}
+		{'Risk for overheating'} {
+			 Synth.new(\riskOverheat).register;
+
+
+		}
+		{'Zero target null'} {
+			//~dataBiCapLow.set(\on, 0);
+			//~dataOverHeat.set(\on,0);
+
+			 Synth.new(\zeroNull).register;
+		//	~dataUnOut.set(\on,0);
+		}
+		{'Unstable output'} {
+			 Synth.new(\unstOutput).register;
+		//
+		};
+
 
 }, 'error');
 
@@ -138,14 +172,14 @@ OSCdef(\errorListener, { arg inputmsg;
 	frequency.value;
 };
 
-/*
 ~mapTones = { arg freq;
 	var incomingNote = freq.cpsmidi;
 	var comparisonValue;
 	var notePosition;
 	var mappedFreq;
-	for (0, ~quantTones.size-1){ arg index;
-		var tempValue = (~quantTones[index] - incomingNote).abs;
+	var tempValue;
+	for (0, ~quantTones.size-1, { arg index;
+		tempValue = (~quantTones[index] - incomingNote).abs;
 		if (comparisonValue.isNumber == false) {
 			comparisonValue = tempValue;
 		};
@@ -153,10 +187,10 @@ OSCdef(\errorListener, { arg inputmsg;
 			comparisonValue = tempValue;
 			notePosition = index;
 		};
-	};
+	});
 	mappedFreq = ~quantTones[notePosition].midicps;
 	mappedFreq.value;
-};*/
+};
 )
 
 // Följande rad kollar vilken lokal address som OSC-lyssnaren använder. Denna måste
